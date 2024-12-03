@@ -13,8 +13,19 @@ def retrieve_bidirectional_edges(g: nx.DiGraph, out_filename: str) -> nx.Graph:
     :param out_filename: name of the file that will be saved.
     :return: a networkx undirected graph.
     """
-
-    pass
+    # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
+    undirected_graph = nx.Graph()
+    
+    # Iterar sobre todas las aristas y verificar si son bidireccionales
+    for u, v in g.edges():
+        if g.has_edge(v, u):  # Verificar si el borde opuesto también existe
+            undirected_graph.add_edge(u, v)
+    
+    # Guardar el grafo resultante en formato graphml
+    nx.write_graphml(undirected_graph, out_filename)
+    
+    return undirected_graph
+    # ----------------- END OF FUNCTION --------------------- #
 
 
 def prune_low_degree_nodes(g: nx.Graph, min_degree: int, out_filename: str) -> nx.Graph:
@@ -27,7 +38,22 @@ def prune_low_degree_nodes(g: nx.Graph, min_degree: int, out_filename: str) -> n
     :return: a pruned networkx graph.
     """
     # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
-    pass
+    pruned_graph = g.copy()
+
+    # Identificar los nodos con grado menor a min_degree
+    nodes_to_remove = [node for node, degree in pruned_graph.degree() if degree < min_degree]
+
+    # Eliminar los nodos identificados
+    pruned_graph.remove_nodes_from(nodes_to_remove)
+
+    # Eliminar nodos de grado 0 que puedan quedar después del filtrado
+    zero_degree_nodes = [node for node, degree in pruned_graph.degree() if degree == 0]
+    pruned_graph.remove_nodes_from(zero_degree_nodes)
+
+    # Guardar el grafo resultante en formato .graphml
+    nx.write_graphml(pruned_graph, out_filename)
+
+    return pruned_graph
     # ----------------- END OF FUNCTION --------------------- #
 
 
