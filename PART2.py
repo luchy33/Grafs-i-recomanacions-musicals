@@ -4,6 +4,7 @@ import pandas as pd
 # ------- IMPLEMENT HERE ANY AUXILIARY FUNCTIONS NEEDED ------- #
 
 
+# --------------- END OF AUXILIARY FUNCTIONS ------------------ #
 
 def retrieve_bidirectional_edges(g: nx.DiGraph, out_filename: str) -> nx.Graph:
     """
@@ -16,12 +17,12 @@ def retrieve_bidirectional_edges(g: nx.DiGraph, out_filename: str) -> nx.Graph:
     # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
     undirected_graph = nx.Graph()
     
-    # Iterar sobre todas las aristas y verificar si son bidireccionales
+    # Iterar sobre totes les arestes
     for u, v in g.edges():
-        if g.has_edge(v, u):  # Verificar si el borde opuesto también existe
+        if g.has_edge(v, u):  # Verificar si les arestes són bidireccionals
             undirected_graph.add_edge(u, v)
     
-    # Guardar el grafo resultante en formato graphml
+    # Guardar el graf resultant en format graphml
     nx.write_graphml(undirected_graph, out_filename)
     
     return undirected_graph
@@ -40,18 +41,18 @@ def prune_low_degree_nodes(g: nx.Graph, min_degree: int, out_filename: str) -> n
     # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
     pruned_graph = g.copy()
 
-    # Identificar los nodos con grado menor a min_degree
+    # Identificar els nodes amb grau menor a min_degree
     nodes_to_remove = [node for node, degree in pruned_graph.degree() if degree < min_degree]
 
-    # Eliminar los nodos identificados
+    # Eliminar-los
     pruned_graph.remove_nodes_from(nodes_to_remove)
 
-    # Eliminar nodos de grado 0 que puedan quedar después del filtrado
+    # Eliminar nodes de grau 0 que hagin quedat
     zero_degree_nodes = [node for node, degree in pruned_graph.degree() if degree == 0]
     pruned_graph.remove_nodes_from(zero_degree_nodes)
 
-    # Guardar el grafo resultante en formato .graphml
-    nx.write_graphml(pruned_graph, out_filename)
+    #nx.write_graphml(pruned_graph, out_filename) 
+    #MIRAR SI CAL GUARDAR
 
     return pruned_graph
     # ----------------- END OF FUNCTION --------------------- #
@@ -68,7 +69,35 @@ def prune_low_weight_edges(g: nx.Graph, min_weight=None, min_percentile=None, ou
     :return: a pruned networkx graph.
     """
     # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
-    pass
+    # Validar los parámetros de entrada
+    if (min_weight is None and min_percentile is None) or (min_weight is not None and min_percentile is not None):
+        raise ValueError("Specify exactly one of 'min_weight' or 'min_percentile', not both or neither.")
+
+    # Determinar el umbral basado en el percentil, si corresponde
+    if min_percentile is not None:
+        if not (0 <= min_percentile <= 100):
+            raise ValueError("'min_percentile' must be between 0 and 100.")
+        
+        # Obtener los pesos de las aristas
+        edge_weights = [data['weight'] for _, _, data in g.edges(data=True)]
+        min_weight = np.percentile(edge_weights, min_percentile)
+
+    # Crear un nuevo grafo
+    pruned_graph = g.copy()
+
+    # Eliminar las aristas con peso menor al umbral
+    edges_to_remove = [(u, v) for u, v, data in pruned_graph.edges(data=True) if data['weight'] < min_weight]
+    pruned_graph.remove_edges_from(edges_to_remove)
+
+    # Eliminar nodos aislados (grado 0)
+    zero_degree_nodes = [node for node, degree in pruned_graph.degree() if degree == 0]
+    pruned_graph.remove_nodes_from(zero_degree_nodes)
+
+    # Guardar el grafo en formato graphml si se especifica
+    if out_filename:
+        nx.write_graphml(pruned_graph, out_filename)
+
+    return pruned_graph
     # ----------------- END OF FUNCTION --------------------- #
 
 
@@ -80,7 +109,17 @@ def compute_mean_audio_features(tracks_df: pd.DataFrame) -> pd.DataFrame:
     :return: artist dataframe (with mean audio features per each artist).
     """
     # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
-    pass
+    required_columns = {'artist_id', 'artist_name'}
+    if not required_columns.issubset(tracks_df.columns):
+        raise ValueError(f"The DataFrame must contain at least the following columns: {required_columns}")
+    
+    # Identificar las columnas que contienen características de audio
+    audio_feature_columns = tracks_df.columns.difference(['artist_id', 'artist_name'])
+    
+    # Agrupar por artista y calcular el promedio de las características de audio
+    artist_features = tracks_df.groupby(['artist_id', 'artist_name'])[audio_feature_columns].mean().reset_index()
+    
+    return artist_features
     # ----------------- END OF FUNCTION --------------------- #
 
 
@@ -98,6 +137,12 @@ def create_similarity_graph(artist_audio_features_df: pd.DataFrame, similarity: 
     pass
     # ----------------- END OF FUNCTION --------------------- #
 
+
+if __name__ == "__main__":
+    # ------- IMPLEMENT HERE THE MAIN FOR THIS SESSION ------- #
+    undirected_graph = retrieve_bidirectional_edges(g, out_filename)
+    
+    # ------------------- END OF MAIN ------------------------ #
 
 if __name__ == "__main__":
     # ------- IMPLEMENT HERE THE MAIN FOR THIS SESSION ------- #
