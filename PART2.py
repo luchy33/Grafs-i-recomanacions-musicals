@@ -169,9 +169,34 @@ def create_similarity_graph(artist_audio_features_df: pd.DataFrame, similarity: 
 
 
 
+
 if __name__ == "__main__":
     # ------- IMPLEMENT HERE THE MAIN FOR THIS SESSION ------- #
-    undirected_graph = retrieve_bidirectional_edges(g, out_filename)
+    #Pas a)
+    print("------Processant BFS i DFS------")
+    gb = nx.read_graphml("BrunoMars_100_BFS.graphml")
+    undirected_graph_bfs = retrieve_bidirectional_edges(gb, "BrunoMars_100_BFS_undirected.graphml")
+    gd = nx.read_graphml("BrunoMars_100_DFS.graphml")
+    undirected_graph_dfs = retrieve_bidirectional_edges(gd, "BrunoMars_100_DFS_undirected.graphml")
+    print("------Grafs no dirigits guardats------")
+    
+    # Pas (b): Crear un graf de similitud basat en les característiques mitjanes
+    print("\n------ Processant característiques d'àudio ------")
+    # Llegir el DataFrame amb les característiques d'àudio (pots canviar l'arxiu si cal)
+    tracks_df = pd.read_csv("BrunoMars_tracks.csv")  # Arxiu amb les característiques de les cançons
+    
+    # Calcular les característiques mitjanes per artista
+    mean_audio_features_df = compute_mean_audio_features(tracks_df)
+    print("Característiques mitjanes calculades per a cada artista.")
+    
+    # Crear un graf de similitud (g_w) basat en les característiques mitjanes
+    similarity_graph = create_similarity_graph(
+        mean_audio_features_df.set_index("artist_name").iloc[:, 2:],  # Usar artist_name com a índex i excloure ID
+        similarity="cosine",  # Mètrica de similitud (també pots usar "euclidean")
+        out_filename="BrunoMars_similarity_graph.graphml"
+    )
+    print("Graf de similitud creat i desat a 'BrunoMars_similarity_graph.graphml'.")
+
     
     # ------------------- END OF MAIN ------------------------ #
 
