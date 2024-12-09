@@ -144,8 +144,3 @@ if __name__ == "__main__":
     
     # ------------------- END OF MAIN ------------------------ #
 
-if __name__ == "__main__":
-    # ------- IMPLEMENT HERE THE MAIN FOR THIS SESSION ------- #
-    pass
-    # ------------------- END OF MAIN ------------------------ #
-
