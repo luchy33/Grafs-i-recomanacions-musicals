@@ -134,21 +134,6 @@ def create_similarity_graph(artist_audio_features_df: pd.DataFrame, similarity: 
     :return: a networkx graph with the similarity between artists as edge weights.
     """
     # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
-    pass
-    # ----------------- END OF FUNCTION --------------------- #
-
-
-def create_similarity_graph(artist_audio_features_df: pd.DataFrame, similarity: str, out_filename: str = None) -> nx.Graph:
-    """
-    Create a similarity graph from a dataframe with mean audio features per artist.
-
-    :param artist_audio_features_df: DataFrame with mean audio features per artist.
-                                      It should have artists as rows and audio features as columns.
-    :param similarity: The name of the similarity metric to use ("cosine" or "euclidean").
-    :param out_filename: Name of the file where the graph will be saved (optional).
-    :return: A NetworkX graph with similarity between artists as edge weights.
-    """
-
     # Extract artist names and audio features
     artist_names = artist_audio_features_df.index.tolist()  # Assuming artists are indexed
     features = artist_audio_features_df.values  # Get the feature matrix (numeric data)
@@ -180,6 +165,9 @@ def create_similarity_graph(artist_audio_features_df: pd.DataFrame, similarity: 
         nx.write_graphml(similarity_graph, out_filename)
 
     return similarity_graph
+    # ----------------- END OF FUNCTION --------------------- #
+
+
 
 if __name__ == "__main__":
     # ------- IMPLEMENT HERE THE MAIN FOR THIS SESSION ------- #
