@@ -138,6 +138,49 @@ def create_similarity_graph(artist_audio_features_df: pd.DataFrame, similarity: 
     # ----------------- END OF FUNCTION --------------------- #
 
 
+def create_similarity_graph(artist_audio_features_df: pd.DataFrame, similarity: str, out_filename: str = None) -> nx.Graph:
+    """
+    Create a similarity graph from a dataframe with mean audio features per artist.
+
+    :param artist_audio_features_df: DataFrame with mean audio features per artist.
+                                      It should have artists as rows and audio features as columns.
+    :param similarity: The name of the similarity metric to use ("cosine" or "euclidean").
+    :param out_filename: Name of the file where the graph will be saved (optional).
+    :return: A NetworkX graph with similarity between artists as edge weights.
+    """
+
+    # Extract artist names and audio features
+    artist_names = artist_audio_features_df.index.tolist()  # Assuming artists are indexed
+    features = artist_audio_features_df.values  # Get the feature matrix (numeric data)
+
+    # Compute the similarity or distance matrix
+    if similarity.lower() == "cosine":
+        similarity_matrix = cosine_similarity(features)
+    elif similarity.lower() == "euclidean":
+        similarity_matrix = -euclidean_distances(features)  # Invert distances to represent similarity
+    else:
+        raise ValueError("Unsupported similarity metric. Use 'cosine' or 'euclidean'.")
+
+    # Create a NetworkX graph
+    similarity_graph = nx.Graph()
+
+    # Add nodes with artist metadata
+    for artist in artist_names:
+        similarity_graph.add_node(artist)
+
+    # Add edges with similarity weights
+    for i, artist_a in enumerate(artist_names):
+        for j, artist_b in enumerate(artist_names):
+            if i < j:  # Avoid duplicate edges (undirected graph)
+                weight = similarity_matrix[i, j]
+                similarity_graph.add_edge(artist_a, artist_b, weight=weight)
+
+    # Save the graph to a file if an output filename is provided
+    if out_filename:
+        nx.write_graphml(similarity_graph, out_filename)
+
+    return similarity_graph
+
 if __name__ == "__main__":
     # ------- IMPLEMENT HERE THE MAIN FOR THIS SESSION ------- #
     undirected_graph = retrieve_bidirectional_edges(g, out_filename)
