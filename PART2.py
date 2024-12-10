@@ -98,14 +98,26 @@ def compute_mean_audio_features(tracks_df: pd.DataFrame) -> pd.DataFrame:
     """
     # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
     required_columns = {'artist_id', 'artist_name'}
+    audio_feature_columns = {
+        "danceability", "energy", "loudness", "speechiness", "acousticness",
+        "instrumentalness", "liveness", "valence", "tempo"
+    }
+    
+    # Validar que el DataFrame conté les columnes necessàries
     if not required_columns.issubset(tracks_df.columns):
         raise ValueError(f"The DataFrame must contain at least the following columns: {required_columns}")
     
-    # Identificar las columnas que contienen características de audio
-    audio_feature_columns = tracks_df.columns.difference(['artist_id', 'artist_name'])
+    # Validar que les columnes de característiques d'àudio estan presents
+    missing_features = audio_feature_columns - set(tracks_df.columns)
+    if missing_features:
+        raise ValueError(f"The DataFrame is missing the following audio feature columns: {missing_features}")
     
-    # Agrupar por artista y calcular el promedio de las características de audio
-    artist_features = tracks_df.groupby(['artist_id', 'artist_name'])[audio_feature_columns].mean().reset_index()
+    # Seleccionar només les columnes necessàries
+    selected_columns = list(required_columns | audio_feature_columns)
+    tracks_df = tracks_df[selected_columns]
+    
+    # Agrupar per artista i calcular la mitjana de les característiques d'àudio
+    artist_features = tracks_df.groupby(['artist_id', 'artist_name'])[list(audio_feature_columns)].mean().reset_index()
     
     return artist_features
     # ----------------- END OF FUNCTION --------------------- #
