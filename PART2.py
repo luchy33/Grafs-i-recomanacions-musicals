@@ -1,12 +1,16 @@
 import networkx as nx
 import pandas as pd
+import numpy as np
 
-# ------- IMPLEMENT HERE ANY AUXILIARY FUNCTIONS NEEDED ------- #
-
-
-# --------------- END OF AUXILIARY FUNCTIONS ------------------ #
 
 def retrieve_bidirectional_edges(g: nx.DiGraph, out_filename: str) -> nx.Graph:
+    graf = nx.Graph() #creem un graf NO dirigit
+    for u, v in g.edges(): #recorrem totes les arestes del graf g (que és dirigit i és passat com a paràmetre)
+        if g.has_edge(v, u):  #si les arestes són bidireccionals (de v a u i de u a v)
+            graf.add_edge(u, v) #afegim una aresta (no dirigida) entre u i v en el graf NO dirigit creat
+    nx.write_graphml(graf, out_filename) #guardem el graf NO dirigit creat amb el nom passat com a paràmetre (out_filename) en format GraphML
+    return graf #retorna el graf NO dirigit creat
+
     """
     Convert a directed graph into an undirected graph by considering bidirectional edges only.
 
@@ -14,22 +18,24 @@ def retrieve_bidirectional_edges(g: nx.DiGraph, out_filename: str) -> nx.Graph:
     :param out_filename: name of the file that will be saved.
     :return: a networkx undirected graph.
     """
-    # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
-    undirected_graph = nx.Graph()
-    
-    # Iterar sobre totes les arestes
-    for u, v in g.edges():
-        if g.has_edge(v, u):  # Verificar si les arestes són bidireccionals
-            undirected_graph.add_edge(u, v)
-    
-    # Guardar el graf resultant en format graphml
-    nx.write_graphml(undirected_graph, out_filename)
-    
-    return undirected_graph
-    # ----------------- END OF FUNCTION --------------------- #
+
 
 
 def prune_low_degree_nodes(g: nx.Graph, min_degree: int, out_filename: str) -> nx.Graph:
+    graf = g.copy() #fem una còpia del graf passat com a paràmetre (g)
+    nodes_eliminar = []  #creem llista buida pels nodes a eliminar
+    for node, degree in graf.degree(): #iterem cada node i el seu grau en el graf
+        if degree < min_degree:  #si el grau del node és més petit que el mínim
+            nodes_eliminar.append(node)  #l'afegim el node a la lista
+    graf.remove_nodes_from(nodes_eliminar) #eliminem els nodes que estiguin a la llista creada
+    grau_zero = [] #creem llista buida pels nodes que s'hagin quedat amb grau 0
+    for node, degree in graf.degree(): #iterem cada node i el seu grau en el graf
+        if degree == 0: #si el grau és 0
+            grau_zero.append(node) #l'afegim a la llista
+    graf.remove_nodes_from(grau_zero) #eliminem els nodes que estiguin a la llista creada
+    #nx.write_graphml(graf, out_filename)  ##guardem el graf creat amb el nom passat com a paràmetre (out_filename) en format GraphML
+    return graf #retorna el graf "modificat" on s'ha eliminat els nodes de grau més petit al mínim passat
+
     """
     Prune a graph by removing nodes with degree < min_degree.
 
@@ -38,24 +44,6 @@ def prune_low_degree_nodes(g: nx.Graph, min_degree: int, out_filename: str) -> n
     :param out_filename: name of the file that will be saved.
     :return: a pruned networkx graph.
     """
-    # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
-    pruned_graph = g.copy()
-
-    # Identificar els nodes amb grau menor a min_degree
-    nodes_to_remove = [node for node, degree in pruned_graph.degree() if degree < min_degree]
-
-    # Eliminar-los
-    pruned_graph.remove_nodes_from(nodes_to_remove)
-
-    # Eliminar nodes de grau 0 que hagin quedat
-    zero_degree_nodes = [node for node, degree in pruned_graph.degree() if degree == 0]
-    pruned_graph.remove_nodes_from(zero_degree_nodes)
-
-    #nx.write_graphml(pruned_graph, out_filename) 
-    #MIRAR SI CAL GUARDAR
-
-    return pruned_graph
-    # ----------------- END OF FUNCTION --------------------- #
 
 
 def prune_low_weight_edges(g: nx.Graph, min_weight=None, min_percentile=None, out_filename: str = None) -> nx.Graph:
