@@ -47,22 +47,21 @@ def crawler(sp: spotipy.client.Spotify, seed: str, max_nodes_to_crawl: int, stra
     :return: networkx directed graph.
     """
     # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
-    graph = nx.DiGraph()
-    visited = set()  
-    to_visit = [seed] 
+    graph = nx.DiGraph() #creem un graf dirigit buit
+    visited = set()  #conjunt d'artistes ja visitats
+    to_visit = [seed]  #llista d'artistes pendents de visitar
     
-    # Crawl artists up to the maximum limit or until no nodes remain
+    # Explora els artistes fins arribar al límit màxim o fins que no quedi cap node pendent
     while to_visit and len(visited) < max_nodes_to_crawl:
-        current_artist = to_visit.pop(0 if strategy == "BFS" else -1)
-        
-        if current_artist in visited:
-            continue
-    
+        current_artist = to_visit.pop(0 if strategy == "BFS" else -1) #agafem el següent artista a visitar segons l'estratègia
+       
+        if current_artist in visited: 
+            continue #si ja hem visitat l'artista, saltem aquesta iteració
+       
         try:
-            # Mark artist as visited
-            visited.add(current_artist)
-    
-            # Retrieve artist information
+            visited.add(current_artist) #marca l'artista com a visitat afegint-lo al conjunt
+       
+            #recupera tota la informació de l'artista: nom, seguidors, popularitat, gèneres
             artist_data = sp.artist(current_artist)
             graph.add_node(
                 current_artist,
@@ -71,23 +70,21 @@ def crawler(sp: spotipy.client.Spotify, seed: str, max_nodes_to_crawl: int, stra
                 popularity=artist_data["popularity"],
                 genres=artist_data["genres"]
             )
-    
-            # Retrieve related artists
-            related_artists = sp.artist_related_artists(current_artist)["artists"]
-            for related_artist in related_artists:
-                related_id = related_artist["id"]
-                if related_id not in visited and related_id not in to_visit:
-                    to_visit.append(related_id)
-                graph.add_edge(current_artist, related_id)
-    
+       
+            related_artists = sp.artist_related_artists(current_artist)["artists"] #recupera els artistes relacionats
+            for related_artist in related_artists: #itera sobre cada artista relacionat a l'artista actual
+                related_id = related_artist["id"] #recupera l'ID dels artistes relacionats
+                if related_id not in visited and related_id not in to_visit: #comprova que no hagin estat visitats
+                    to_visit.append(related_id) #afegeix els artistes relacionats a la llista a visitar
+                graph.add_edge(current_artist, related_id) #afegeix una aresta del node actual als artistes relacionats
+       
         except spotipy.exceptions.SpotifyException as e:
-            print(f"SpotifyException occurred for artist {current_artist}: {e}")
+            print(f"S'ha produït una SpotifyException per a l'artista {current_artist}: {e}") #gestiona errors específics de Spotify
         except Exception as e:
-            print(f"An error occurred for artist {current_artist}: {e}")
-    
-    # Save the graph in graphml format
-    nx.write_graphml(graph, out_filename)
-    return graph
+            print(f"S'ha produït un error per a l'artista {current_artist}: {e}") #gestiona errors generals
+       
+    nx.write_graphml(graph, out_filename) #guardem el graf a l'arxiu que hi ha a la variable "out_filename"
+    return graph #retornem el graf
     # ----------------- END OF FUNCTION --------------------- #
 
        
@@ -102,29 +99,24 @@ def get_track_data(sp: spotipy.client.Spotify, graphs: list, out_filename: str) 
     :return: pandas dataframe with the top song data.
     """
     # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
-    # Troba els artistes comuns a tots els grafs
-    common_artists = set.intersection(*(set(graph.nodes) for graph in graphs))
+    common_artists = set.intersection(*(set(graph.nodes) for graph in graphs)) #troba els artistes comuns entre tots els grafs
+    track_data = [] #llista buida per guardar informació de les cançons
 
-    track_data = []
-
-    for artist_id in common_artists:
+    for artist_id in common_artists:  #iterem sobre cada artista comú entre tots els grafs
         try:
-            # Obté la informació de l'artista d'un dels grafs
-            artist_name = next(
-                graph.nodes[artist_id]["name"]
-                for graph in graphs
-                if artist_id in graph.nodes
+            #cerquem el nom de l'artista dins dels nodes dels grafs
+            artist_name = next( # Utilitzem `next` per obtenir el primer resultat vàlid d'entre els grafs que contenen aquest artista
+                graph.nodes[artist_id]["name"]  #recuperem el nom de l'artista des dels atributs del node
+                for graph in graphs  #iterem sobre la llista de grafs
+                if artist_id in graph.nodes  #només considerem els grafs que contenen aquest artista
             )
             
-            # Obté les cançons principals de l'artista a Espanya
-            top_tracks = sp.artist_top_tracks(artist_id, country="ES")["tracks"]
+            top_tracks = sp.artist_top_tracks(artist_id, country="ES")["tracks"] #recupera les cançons més escoltades de l'artista
             
             for track in top_tracks:
-                # Obté les característiques d'àudio de la cançó
-                audio_features = sp.audio_features([track["id"]])[0]
+                audio_features = sp.audio_features([track["id"]])[0] #recupera les característiques d'àudio de cada cançó
                 
-                # Afegeix les dades de la cançó
-                track_data.append({
+                track_data.append({ #afegeix la informació de cada cançó a la llista
                     "track_id": track["id"],
                     "track_name": track["name"],
                     "track_duration_ms": track["duration_ms"],
@@ -146,18 +138,15 @@ def get_track_data(sp: spotipy.client.Spotify, graphs: list, out_filename: str) 
                 })
         
         except spotipy.exceptions.SpotifyException as e:
-            print(f"S'ha produït una SpotifyException per a l'artista {artist_id}: {e}")
+            print(f"SpotifyException occurred for artist {artist_id}: {e}") #gestiona errors específics de Spotify
         except Exception as e:
-            print(f"S'ha produït un error per a l'artista {artist_id}: {e}")
+            print(f"An error occurred for artist {artist_id}: {e}") #gestiona errors generals
 
-    # Crea un DataFrame a partir de les dades recopilades
-    df = pd.DataFrame(track_data)
+    df = pd.DataFrame(track_data) #crea un DataFrame amb la informació recollida
 
-    # Desa el DataFrame en un fitxer CSV
-    df.to_csv(out_filename, index=False)
-
-    return df
-
+    df.to_csv(out_filename, index=False) #guarda el DataFrame en un fitxer CSV
+    
+    return df #retorna el DataFrame
     # ----------------- END OF FUNCTION --------------------- #
 
 
