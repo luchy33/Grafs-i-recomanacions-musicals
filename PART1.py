@@ -21,16 +21,16 @@ def search_artist(sp: spotipy.client.Spotify, artist_name: str) -> str:
     """
     # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
     try:
-        result = sp.search(q=f'artist:{artist_name}', type='artist', limit=1)
-        if result['artists']['items']:
-            artist_id = result['artists']['items'][0]['id']
-            return artist_id
+        result = sp.search(q=f'artist:{artist_name}', type='artist', limit=1) #busquem l'artista a Spotify amb el nom especificat
+        if result['artists']['items']: #comprovem si hi ha resultats
+            artist_id = result['artists']['items'][0]['id'] #recuperem l'ID del primer artista trobat
+            return artist_id #retornem l'ID de l'artista
         else:
-            return f"Artist '{artist_name}' not found."
+            return f"Artista '{artist_name}' no trobat" #si no hi ha resultats, informem que no s'ha trobat l'artista
     except spotipy.exceptions.SpotifyException as e:
-        return f"SpotifyException occurred: {e}"
+        return f"SpotifyException: {e}" #gestiona errors específics de Spotify
     except Exception as e:
-        return f"An unexpected error occurred: {e}"
+        return f"Error: {e}" #gestiona errors generals
     # ----------------- END OF FUNCTION --------------------- #
 
 
