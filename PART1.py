@@ -161,11 +161,12 @@ def get_track_data(sp: spotipy.client.Spotify, graphs: list, out_filename: str) 
     # ----------------- END OF FUNCTION --------------------- #
 
 
+
 if __name__ == "__main__":
     # ------- IMPLEMENT HERE THE MAIN FOR THIS SESSION ------- #
     CLIENT_ID = "0a03746de0e54710b6aab33d9e73c5c5"
     CLIENT_SECRET = "19a652f5d6a14596a078cba2b5edef3a"
-    auth_manager = SpotifyClientCredentials (client_id = CLIENT_ID, client_secret = CLIENT_SECRET)
+    auth_manager = SpotifyClientCredentials(client_id = CLIENT_ID, client_secret = CLIENT_SECRET)
     sp = spotipy.Spotify(auth_manager=auth_manager)
 
     playlists = sp.user_playlists('claudiabf27')
@@ -177,5 +178,8 @@ if __name__ == "__main__":
         else:
             playlists = None
     print(playlists)
-    print(search_artist(sp, "Rosalia"))
+    ll_grafs = list()
+    ll_grafs.append(crawler(sp, "Bruno Mars", 100, "BFS", "BM_BFS.graphml"))
+    ll_grafs.append(crawler(sp, "Bruno Mars", 100, "DFS", "BM_DFS.graphml"))
+    data_frame = get_track_data(sp, ll_grafs, "BrunoMars_100.csv")
     # ------------------- END OF MAIN ------------------------ #
