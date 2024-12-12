@@ -118,27 +118,26 @@ def create_similarity_graph(artist_audio_features_df: pd.DataFrame, similarity: 
     :param out_filename: name of the file that will be saved.
     :return: a networkx graph with the similarity between artists as edge weights.
     """
-    
     noms_artistes = artist_audio_features_df.index.tolist() #emmagatzema en la llista "noms_artistes" els indexs que equivalen als artistes en el dataframe 
     caracteristiques = artist_audio_features_df.values  #guardem en "caracteristiques" els valors numèrics de les característiques que conte el dataframe
-    if similarity.lower() == "cosine":
+    if similarity.lower() == "cosine": #segons la similaritat que es passa a la funció, s'utilitza una mètrica o una altra amb les caracterísitques
         similarity_matrix = cosine_similarity(caracteristiques)
     elif similarity.lower() == "euclidean":
-        similarity_matrix = -euclidean_distances(caracteristiques)  # Invert distances to represent similarity
-    else:
-        raise ValueError("Unsupported similarity metric. Use 'cosine' or 'euclidean'.")
+        similarity_matrix = -euclidean_distances(caracteristiques)
+    else: #si similarity no és ni cosine ni euclidean imprimeix error
+        raise ValueError("Similaritat invàlida, utilitza 'cosine' o 'euclidean'.")
 
-    similarity_graph = nx.Graph()
-    for artist in noms_artistes:
-        similarity_graph.add_node(artist)
-    for i, artist_a in enumerate(noms_artistes):
-        for j, artist_b in enumerate(noms_artistes):
-            if i < j:  # Avoid duplicate edges (undirected graph)
-                weight = similarity_matrix[i, j]
-                similarity_graph.add_edge(artist_a, artist_b, weight=weight)
-    if out_filename:
-        nx.write_graphml(similarity_graph, out_filename)
-    return similarity_graph
+    similarity_graph = nx.Graph() #creem un nour graf buit per fer-lo amb les similaritats
+    for artist in noms_artistes: #iterem sobre la llista "nom_artistes"
+        similarity_graph.add_node(artist) #afegim l'artista al graf
+    for i, artist_a in enumerate(noms_artistes): #obtenim índex i artista
+        for j, artist_b in enumerate(noms_artistes): #obtenim un altre índex i un altre artista
+            if i < j:  # Evitem duplicar arestes (graf no dirigit)
+                weight = similarity_matrix[i, j] #els índexs i j ens serveixen per obtenir el pes d'aquella aresta entre els artistes de la matriu
+                similarity_graph.add_edge(artist_a, artist_b, weight=weight) #afegim el pes a l'artesta entre els dos artistes
+    if out_filename: #si s'ha passat un arxiu de sortida per guardar el graf
+        nx.write_graphml(similarity_graph, out_filename) #guardem el graf a l'arxiu que hi ha a la variable "out_filename"
+    return similarity_graph #retornem el graf
  
     
 if __name__ == "__main__":
