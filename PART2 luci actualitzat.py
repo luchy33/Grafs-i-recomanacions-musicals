@@ -1,8 +1,13 @@
 import networkx as nx
 import pandas as pd
-import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.metrics.pairwise import euclidean_distances
+import numpy as np
+
+# ------- IMPLEMENT HERE ANY AUXILIARY FUNCTIONS NEEDED ------- #
+
+
+# --------------- END OF AUXILIARY FUNCTIONS ------------------ #
 
 def retrieve_bidirectional_edges(g: nx.DiGraph, out_filename: str) -> nx.Graph:
     """
@@ -12,14 +17,16 @@ def retrieve_bidirectional_edges(g: nx.DiGraph, out_filename: str) -> nx.Graph:
     :param out_filename: name of the file that will be saved.
     :return: a networkx undirected graph.
     """
-
+    # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
     graf = nx.Graph() #creem un graf NO dirigit
+    
     for u, v in g.edges(): #recorrem totes les arestes del graf g (que és dirigit i és passat com a paràmetre)
         if g.has_edge(v, u):  #si les arestes són bidireccionals (de v a u i de u a v)
             graf.add_edge(u, v) #afegim una aresta (no dirigida) entre u i v en el graf NO dirigit creat
+    
     nx.write_graphml(graf, out_filename) #guardem el graf NO dirigit creat amb el nom passat com a paràmetre (out_filename) en format GraphML
     return graf #retorna el graf NO dirigit creat
-    
+    # ----------------- END OF FUNCTION --------------------- #
 
 
 def prune_low_degree_nodes(g: nx.Graph, min_degree: int, out_filename: str) -> nx.Graph:
@@ -31,21 +38,24 @@ def prune_low_degree_nodes(g: nx.Graph, min_degree: int, out_filename: str) -> n
     :param out_filename: name of the file that will be saved.
     :return: a pruned networkx graph.
     """
-    
+    # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
     graf = g.copy() #fem una còpia del graf passat com a paràmetre (g)
+    
     nodes_eliminar = []  #creem llista buida pels nodes a eliminar
     for node, degree in graf.degree(): #iterem cada node i el seu grau en el graf
         if degree < min_degree:  #si el grau del node és més petit que el mínim
             nodes_eliminar.append(node)  #l'afegim el node a la lista
     graf.remove_nodes_from(nodes_eliminar) #eliminem els nodes que estiguin a la llista creada
+   
     grau_zero = [] #creem llista buida pels nodes que s'hagin quedat amb grau 0
     for node, degree in graf.degree(): #iterem cada node i el seu grau en el graf
         if degree == 0: #si el grau és 0
             grau_zero.append(node) #l'afegim a la llista
     graf.remove_nodes_from(grau_zero) #eliminem els nodes que estiguin a la llista creada
     #nx.write_graphml(graf, out_filename)  ##guardem el graf creat amb el nom passat com a paràmetre (out_filename) en format GraphML
+    
     return graf #retorna el graf "modificat" on s'ha eliminat els nodes de grau més petit al mínim passat
-   
+    # ----------------- END OF FUNCTION --------------------- #
 
 
 def prune_low_weight_edges(g: nx.Graph, min_weight=None, min_percentile=None, out_filename: str = None) -> nx.Graph:
@@ -58,7 +68,7 @@ def prune_low_weight_edges(g: nx.Graph, min_weight=None, min_percentile=None, ou
     :param out_filename: name of the file that will be saved.
     :return: a pruned networkx graph.
     """
-    
+    # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
     if (min_weight is None and min_percentile is None) or (min_weight is not None and min_percentile is not None): #comprova que es passi per paràmetre o bé min_weight o bé min_percentile
         raise ValueError("Has d'especificar o min_weight o min_percentile, no els dos o cap.") #sino, salta error
     if min_percentile is not None: #si el paràmetre és el min_percentile
@@ -81,35 +91,51 @@ def prune_low_weight_edges(g: nx.Graph, min_weight=None, min_percentile=None, ou
     graf.remove_nodes_from(grau_zero) #eliminem els nodes que estiguin a la llista creada
     nx.write_graphml(graf, out_filename)  ##guardem el graf creat amb el nom passat com a paràmetre (out_filename) en format GraphML
     return graf #retorna el graf "modificat" on s'ha eliminat els node
+    # ----------------- END OF FUNCTION --------------------- #
 
-    
 
 def compute_mean_audio_features(tracks_df: pd.DataFrame) -> pd.DataFrame:
-    required_columns = {'artist_id', 'artist_name'}
-    audio_feature_columns = {
-        "danceability", "energy", "loudness", "speechiness", "acousticness",
-        "instrumentalness", "liveness", "valence", "tempo"
-    }
-    if not required_columns.issubset(tracks_df.columns):
-        raise ValueError(f"The DataFrame must contain at least the following columns: {required_columns}")
-    missing_features = audio_feature_columns - set(tracks_df.columns)
-    if missing_features:
-        raise ValueError(f"The DataFrame is missing the following audio feature columns: {missing_features}")
-    selected_columns = list(required_columns | audio_feature_columns)
-    tracks_df = tracks_df[selected_columns]
-    artist_features = tracks_df.groupby(['artist_id', 'artist_name'])[list(audio_feature_columns)].mean().reset_index()
-    return artist_features
-
     """
     Compute the mean audio features for tracks of the same artist.
 
     :param tracks_df: tracks dataframe (with audio features per each track).
     :return: artist dataframe (with mean audio features per each artist).
     """
+    # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
+    required_columns = {'artist_id', 'artist_name'} #indiquem les columnes relacionades amb les característiques d'àudio
+    audio_feature_columns = {
+        "danceability", "energy", "loudness", "speechiness", "acousticness",
+        "instrumentalness", "liveness", "valence", "tempo"
+    } #característiques d'àudio utilitzades per calcular les mitjanes
+    
+    #validem que el DataFrame conté les columnes necessàries per processar la informació
+    if not required_columns.issubset(tracks_df.columns):
+        raise ValueError(f"El DataFrame ha de contenir com a mínim: {required_columns}")
+    
+    #comprovem que totes lescaracterístiques d'àudio estan presents al DataFrame
+    missing_features = audio_feature_columns - set(tracks_df.columns) #combinem les dues categories per saber si en falta alguna
+    if missing_features:
+        raise ValueError(f"Al DataFrame li falten les columnes: {missing_features}")
+    
+    #seleccionem només les columnes rellevants (identificadors i característiques d'àudio)
+    selected_columns = list(required_columns | audio_feature_columns) #combinem les dues categories
+    tracks_df = tracks_df[selected_columns] #les extraiem del DataFrame
+    
+    #agrupem les pistes per 'artist_id' i 'artist_name' i calculem la mitjana de les característiques d'àudio
+    artist_features = (
+        tracks_df
+        .groupby(['artist_id', 'artist_name'])[list(audio_feature_columns)]
+        .mean()  #calculem la mitjana per cada columna "audio_features_columns"
+        .reset_index()  #eestablim l'índex per obtenir un DataFrame perquè artits_id i artist_name no facin "d'índex"
+    )
+    
+    return artist_features # Retornem el nou DataFrame amb les mitjanes calculades
+    # ----------------- END OF FUNCTION --------------------- #
 
 
 
-def create_similarity_graph(artist_audio_features_df: pd.DataFrame, similarity: str, out_filename: str = None) -> nx.Graph:
+def create_similarity_graph(artist_audio_features_df: pd.DataFrame, similarity: str, out_filename: str = None) -> \
+        nx.Graph:
     """
     Create a similarity graph from a dataframe with mean audio features per artist.
 
@@ -118,6 +144,7 @@ def create_similarity_graph(artist_audio_features_df: pd.DataFrame, similarity: 
     :param out_filename: name of the file that will be saved.
     :return: a networkx graph with the similarity between artists as edge weights.
     """
+    # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
     noms_artistes = artist_audio_features_df.index.tolist() #emmagatzema en la llista "noms_artistes" els indexs que equivalen als artistes en el dataframe 
     caracteristiques = artist_audio_features_df.values  #guardem en "caracteristiques" els valors numèrics de les característiques que conte el dataframe
     if similarity.lower() == "cosine": #segons la similaritat que es passa a la funció, s'utilitza una mètrica o una altra amb les caracterísitques
@@ -138,9 +165,12 @@ def create_similarity_graph(artist_audio_features_df: pd.DataFrame, similarity: 
     if out_filename: #si s'ha passat un arxiu de sortida per guardar el graf
         nx.write_graphml(similarity_graph, out_filename) #guardem el graf a l'arxiu que hi ha a la variable "out_filename"
     return similarity_graph #retornem el graf
- 
-    
+    # ----------------- END OF FUNCTION --------------------- #
+
+
 if __name__ == "__main__":
+    # ------- IMPLEMENT HERE THE MAIN FOR THIS SESSION ------- #
+    # Pas a)
     print("------ Processant BFS i DFS ------")
     try:
         gb = nx.read_graphml("BrunoMars_100_BFS.graphml")
@@ -170,7 +200,7 @@ if __name__ == "__main__":
 
     try:
         similarity_graph = create_similarity_graph(
-            mean_audio_features_df.set_index("artist_id").iloc[:, 2:],  # Usar artist_id com a índex
+            mean_audio_features_df.set_index("artist_id").iloc[:, 2:],  #seleccionem totes les files, a partir de la tercera columna i establim "artist_id" com l'índex del dataframe
             similarity="cosine",
             out_filename="BrunoMars_similarity_graph.graphml"
         )
@@ -179,3 +209,4 @@ if __name__ == "__main__":
         print(f"Error creant el graf de similitud: {e}")
 
     # ------------------- END OF MAIN ------------------------ #
+
