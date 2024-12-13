@@ -51,7 +51,7 @@ def crawler(sp: spotipy.client.Spotify, seed: str, max_nodes_to_crawl: int, stra
     visited = set()  #conjunt d'artistes ja visitats
     to_visit = [seed]  #llista d'artistes pendents de visitar
     
-    # Explora els artistes fins arribar al límit màxim o fins que no quedi cap node pendent
+    #explora els artistes fins arribar al límit màxim o fins que no quedi cap node pendent
     while to_visit and len(visited) < max_nodes_to_crawl:
         current_artist = to_visit.pop(0 if strategy == "BFS" else -1) #agafem el següent artista a visitar segons l'estratègia
        
@@ -82,21 +82,24 @@ def crawler(sp: spotipy.client.Spotify, seed: str, max_nodes_to_crawl: int, stra
             print(f"S'ha produït una SpotifyException per a l'artista {current_artist}: {e}") #gestiona errors específics de Spotify
         except Exception as e:
             print(f"S'ha produït un error per a l'artista {current_artist}: {e}") #gestiona errors generals
-       
-    nx.write_graphml(graph, out_filename) #guardem el graf a l'arxiu que hi ha a la variable "out_filename"
-    return graph #retornem el graf
+    if len(graph) > 0: #comprovem que el graf no estigui buit
+        nx.write_graphml(graph, out_filename) #guardem el graf a l'arxiu que hi ha a la variable "out_filename"
+        return graph #retornem el graf
+    else:
+        print("El graf està buit")
+        return graph
     # ----------------- END OF FUNCTION --------------------- #
 
-       
- 
+
+
 def get_track_data(sp: spotipy.client.Spotify, graphs: list, out_filename: str) -> pd.DataFrame:
     """
-    Get top songs in Spain for the artists that appear in each and all graphs in the list.
+    Get track data for each visited artist in the graph.
 
     :param sp: spotipy client object
-    :param graphs: a list of networkx graphs with artists as nodes.
+    :param graphs: a list of graphs with artists as nodes.
     :param out_filename: name of the csv output file.
-    :return: pandas dataframe with the top song data.
+    :return: pandas dataframe with track data.
     """
     # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
     common_artists = set.intersection(*(set(graph.nodes) for graph in graphs)) #troba els artistes comuns entre tots els grafs
@@ -143,12 +146,13 @@ def get_track_data(sp: spotipy.client.Spotify, graphs: list, out_filename: str) 
             print(f"An error occurred for artist {artist_id}: {e}") #gestiona errors generals
 
     df = pd.DataFrame(track_data) #crea un DataFrame amb la informació recollida
-
-    df.to_csv(out_filename, index=False) #guarda el DataFrame en un fitxer CSV
     
+    if df.empty: #comprovem que el dataframe no estigui buit
+        print("No s'ha trobat cap data, el csv no es crearà")
+    else:
+        df.to_csv(out_filename, index=False) #guarda el DataFrame en un fitxer CSV
     return df #retorna el DataFrame
     # ----------------- END OF FUNCTION --------------------- #
-
 
 
 if __name__ == "__main__":
