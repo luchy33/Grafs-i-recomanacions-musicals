@@ -167,8 +167,9 @@ if __name__ == "__main__":
         else:
             playlists = None
     print(playlists)
-    ll_grafs = list()
-    ll_grafs.append(crawler(sp, "Bruno Mars", 100, "BFS", "BM_BFS.graphml"))
-    ll_grafs.append(crawler(sp, "Bruno Mars", 100, "DFS", "BM_DFS.graphml"))
-    data_frame = get_track_data(sp, ll_grafs, "BrunoMars_100.csv")
+    artist_id = search_artist(sp, "Bruno Mars") #obtenim la id de l'artista
+    ll_grafs = list() #fem una llista per emmagatzemar els grafs BFS i DFS
+    ll_grafs.append(crawler(sp, str(artist_id), 100, "BFS", "BM_BFS.graphml")) #cridem la funció amb Burno Mars per obtenir el graf BFS
+    ll_grafs.append(crawler(sp, str(artist_id), 100, "DFS", "BM_DFS.graphml")) #cridem la funció amb Bruno Mars per obtenir el graf DFS
+    data_frame = get_track_data(sp, ll_grafs, "BrunoMars_100.csv") #obtenim el data frame
     # ------------------- END OF MAIN ------------------------ #
