@@ -112,11 +112,6 @@ def compute_mean_audio_features(tracks_df: pd.DataFrame) -> pd.DataFrame:
     if not required_columns.issubset(tracks_df.columns):
         raise ValueError(f"El DataFrame ha de contenir com a mínim: {required_columns}")
     
-    #comprovem que totes lescaracterístiques d'àudio estan presents al DataFrame
-    missing_features = audio_feature_columns - set(tracks_df.columns) #combinem les dues categories per saber si en falta alguna
-    if missing_features:
-        raise ValueError(f"Al DataFrame li falten les columnes: {missing_features}")
-    
     #seleccionem només les columnes rellevants (identificadors i característiques d'àudio)
     selected_columns = list(required_columns | audio_feature_columns) #combinem les dues categories
     tracks_df = tracks_df[selected_columns] #les extraiem del DataFrame
