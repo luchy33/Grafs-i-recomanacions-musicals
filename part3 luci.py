@@ -20,19 +20,18 @@ def num_common_nodes(*arg):
 
 
 def get_degree_distribution(g: nx.Graph) -> dict:
-    degree_count = {}
-    for _, degree in g.degree():
-        if degree not in degree_count:
-            degree_count[degree] = 0  # Inicializar si el grado no está en el diccionario
-        degree_count[degree] += 1   # Incrementar el contador para este grado
-    return degree_count
-
     """
     Get the degree distribution of the graph.
 
     :param g: networkx graph.
     :return: dictionary with degree distribution (keys are degrees, values are number of occurrences).
     """
+    degree_count = {} #creem un diccionari per poder guardar la quantitat de nodes amb x degree
+    for node, degree in g.degree(): #iterem sobre el graf i obtenim un node i el grau d'aquest
+        if degree not in degree_count: #comprovem que el grau no estigui al diccionari
+            degree_count[degree] = 0  #l'inicialitzem si no està en el diccionari a 0
+        degree_count[degree] += 1   #incrementem el comptador (tant si s'acaba d'afegir el grau o ja existeix com a clau)
+    return degree_count #retornem el diccionari
 
 
 def get_k_most_central(g: nx.Graph, metric: str, num_nodes: int) -> list:
