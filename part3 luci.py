@@ -6,18 +6,17 @@ import networkx as nx
 
 
 def num_common_nodes(*arg):
-    if len(arg) < 2:
-        raise ValueError("At least two graphs are required to find common nodes.")
-    node_sets = [set(graph.nodes) for graph in arg]
-    common_nodes = set.intersection(*node_sets)
-    return len(common_nodes)
-
     """
     Return the number of common nodes between a set of graphs.
 
     :param arg: (an undetermined number of) networkx graphs.
     :return: an integer, number of common nodes.
     """
+    if len(arg) < 2: #si no hi ha grafs a la tupla arg o només 1 no es poden trobar nodes comuns
+        raise ValueError("Error: Com a mínim es necessiten dos grafs per poder trobar nodes comuns.")
+    node_sets = [set(graph.nodes) for graph in arg] #recorrem cada graf de la tupla, seleccionem els seus nodes i els guardem en un conjunt. Com a resultat obtenim una llista de conjunts de nodes
+    common_nodes = set.intersection(*node_sets) #fem la intersecció de tots els conjunts de nodes per seleccionar els comuns, * permet obtenir tots els conjunts de la llista
+    return len(common_nodes) #retornem la longitud del conjunt de nodes comuns per saber quants n'hi ha de comuns
 
 
 def get_degree_distribution(g: nx.Graph) -> dict:
