@@ -58,16 +58,10 @@ def get_k_most_central(g: nx.Graph, metric: str, num_nodes: int) -> list:
         raise ValueError("Error: Mètric invàlida, utilitza 'degree', 'betweenness', 'closeness', o 'eigenvector'.")
 
     centrality = centrality_functions[metric](g) #calculem la centralitat del graf, seleccionant la mètrica del diccionari i ho guardem en el diccionari centrality (claus: nodes, valors: valor centralitat)
-
     return sorted(centrality, key=centrality.get, reverse=True)[:num_nodes] #ordenem els nodes segons els valors de centralitat més alts (reverse=True) i els guardem en una llista, després seleccionem els primers num_nodes i els retornem 
 
 
 def find_cliques(g: nx.Graph, min_size_clique: int) -> tuple:
-    all_cliques = list(nx.find_cliques(g))
-    filtered_cliques = [clique for clique in all_cliques if len(clique) >= min_size_clique]
-    nodes_in_cliques = set(node for clique in filtered_cliques for node in clique)
-    return filtered_cliques, list(nodes_in_cliques)
-    
     """
     Find cliques in the graph g with size at least min_size_clique.
 
@@ -76,6 +70,10 @@ def find_cliques(g: nx.Graph, min_size_clique: int) -> tuple:
     :return: two-element tuple, list of cliques (each clique is a list of nodes) and
         list of nodes in any of the cliques.
     """
+    all_cliques = list(nx.find_cliques(g)) #trobem totes les cliques del graf, cada clique emmagatzemada en una llista (de nodes que formen la clique) i totes les llistes es troben en una mateixa llista anomenada "all_cliques" 
+    filtered_cliques = [clique for clique in all_cliques if len(clique) >= min_size_clique] #filtrem la llista de llistes/cliques per quedar-nos només amb les que tinguin igual o major nombre de nodes que "min_size_cliques"
+    nodes_in_cliques = set(node for clique in filtered_cliques for node in clique) #recorrem cada node de cada clique i l'afegim al conjunt "nodes_in_cliques" per quedar-nos sense cap repetit
+    return filtered_cliques, list(nodes_in_cliques) #retornem la llista "filtered_cliques" i el conjunt "nodes_in_cliques" el retornem com una llista
 
 
 def detect_communities(g: nx.Graph, method: str) -> tuple:
