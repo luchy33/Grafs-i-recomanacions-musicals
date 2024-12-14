@@ -3,6 +3,10 @@ import networkx as nx
 #from networkx.algorithms.community import girvan_newman
 #from community import community_louvain
 
+# ------- IMPLEMENT HERE ANY AUXILIARY FUNCTIONS NEEDED ------- #
+
+
+# --------------- END OF AUXILIARY FUNCTIONS ------------------ #
 
 
 def num_common_nodes(*arg):
@@ -55,8 +59,7 @@ def get_k_most_central(g: nx.Graph, metric: str, num_nodes: int) -> list:
 
     centrality = centrality_functions[metric](g) #calculem la centralitat del graf, seleccionant la mètrica del diccionari i ho guardem en el diccionari centrality (claus: nodes, valors: valor centralitat)
 
-    return sorted(centrality, key=centrality.get, reverse=True)[:num_nodes] #ordenem els nodes segons els valors de centralitat més alts (reverse=True) i els guardem en una llista, després seleccionem els primers num_nodes
-
+    return sorted(centrality, key=centrality.get, reverse=True)[:num_nodes] #ordenem els nodes segons els valors de centralitat més alts (reverse=True) i els guardem en una llista, després seleccionem els primers num_nodes i els retornem 
 
 
 def find_cliques(g: nx.Graph, min_size_clique: int) -> tuple:
