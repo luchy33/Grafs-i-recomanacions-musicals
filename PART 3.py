@@ -35,19 +35,6 @@ def get_degree_distribution(g: nx.Graph) -> dict:
 
 
 def get_k_most_central(g: nx.Graph, metric: str, num_nodes: int) -> list:
-    if metric == 'degree':
-        centrality = nx.degree_centrality(g)
-    elif metric == 'betweenness':
-        centrality = nx.betweenness_centrality(g)
-    elif metric == 'closeness':
-        centrality = nx.closeness_centrality(g)
-    elif metric == 'eigenvector':
-        centrality = nx.eigenvector_centrality(g)
-    else:
-        raise ValueError("Unsupported metric. Use 'degree', 'betweenness', 'closeness', or 'eigenvector'.")
-    sorted_nodes = sorted(centrality.items(), key=lambda x: x[1], reverse=True)
-    return [node for node, _ in sorted_nodes[:num_nodes]]
-
     """
     Get the k most central nodes in the graph.
 
@@ -56,7 +43,21 @@ def get_k_most_central(g: nx.Graph, metric: str, num_nodes: int) -> list:
     :param num_nodes: number of nodes to return.
     :return: list with the top num_nodes nodes.
     """
- 
+    centrality_functions = { 
+        'degree': nx.degree_centrality,
+        'betweenness': nx.betweenness_centrality,
+        'closeness': nx.closeness_centrality,
+        'eigenvector': nx.eigenvector_centrality,
+    } #diccionari amb les mètriques disponibles a la funció
+    
+    if metric not in centrality_functions: #comprovem si la mètrica està en el diccionari, per tant, si és vàlida
+        raise ValueError("Error: Mètric invàlida, utilitza 'degree', 'betweenness', 'closeness', o 'eigenvector'.")
+
+    centrality = centrality_functions[metric](g) #calculem la centralitat del graf, seleccionant la mètrica del diccionari i ho guardem en el diccionari centrality (claus: nodes, valors: valor centralitat)
+
+    return sorted(centrality, key=centrality.get, reverse=True)[:num_nodes] #ordenem els nodes segons els valors de centralitat més alts (reverse=True) i els guardem en una llista, després seleccionem els primers num_nodes
+
+
 
 def find_cliques(g: nx.Graph, min_size_clique: int) -> tuple:
     all_cliques = list(nx.find_cliques(g))
