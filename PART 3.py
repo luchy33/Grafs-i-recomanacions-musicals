@@ -77,21 +77,6 @@ def find_cliques(g: nx.Graph, min_size_clique: int) -> tuple:
 
 
 def detect_communities(g: nx.Graph, method: str) -> tuple:
-    if method == 'girvan-newman':
-        communities_generator = girvan_newman(g)
-        communities = next(communities_generator)
-        communities = [list(c) for c in communities]
-    elif method == 'louvain':
-        partition = community_louvain.best_partition(g)
-        communities = {}
-        for node, comm in partition.items():
-            communities.setdefault(comm, []).append(node)
-        communities = list(communities.values())
-    else:
-        raise ValueError("Unsupported method. Use 'girvan-newman' or 'louvain'.")
-    modularity = nx.algorithms.community.quality.modularity(g, communities)
-    return communities, modularity
-
     """
     Detect communities in the graph g using the specified method.
 
@@ -99,6 +84,21 @@ def detect_communities(g: nx.Graph, method: str) -> tuple:
     :param method: string with the name of the method to use. Can be (at least) 'givarn-newman' or 'louvain'.
     :return: two-element tuple, list of communities (each community is a list of nodes) and modularity of the partition.
     """
+    # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
+    if method.lower() == 'girvan-newman': #si el mètode seleccionat es Girvan-Newman utilitzem el seu algoritme
+        communities_generator = girvan_newman(g) #generem les comunitats
+        communities = next(communities_generator) #amb next obtenim la primera
+        communities = [list(c) for c in communities] #iterem sobre la llista "comunities" i les convertim en una llista per guardar a "comunities" una llista de llistes
+    elif method.lower() == 'louvain':
+        partition = community_louvain.best_partition(g)
+        communities = {}
+        for node, comm in partition.items():
+            communities.setdefault(comm, []).append(node)
+        communities = list(communities.values())
+    else:
+        raise ValueError("Error: Mètode invàlida, utilitza 'girvan-newman' o 'louvain'.")
+    modularity = nx.algorithms.community.quality.modularity(g, communities)
+    return communities, modularity #retornem
   
 
 
