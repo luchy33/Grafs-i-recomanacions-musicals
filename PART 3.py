@@ -145,7 +145,7 @@ if __name__ == '__main__':
     
     # Test de la funció 'detect_communities' amb 'girvan-newman'
     print("# --- Detecció de comunitats (Girvan-Newman) --- #")
-    communities, modularity = detect_communities(g, method='girvan-newman')
+    communities, modularity = detect_communities(gd, method='girvan-newman')
     print(f"Comunitats detectades: {communities}")
     print(f"Modularitat: {modularity:.4f}")
     print()
