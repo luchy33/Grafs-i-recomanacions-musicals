@@ -84,21 +84,25 @@ def detect_communities(g: nx.Graph, method: str) -> tuple:
     :param method: string with the name of the method to use. Can be (at least) 'givarn-newman' or 'louvain'.
     :return: two-element tuple, list of communities (each community is a list of nodes) and modularity of the partition.
     """
-    # ------- IMPLEMENT HERE THE BODY OF THE FUNCTION ------- #
-    if method.lower() == 'girvan-newman': #si el mètode seleccionat es Girvan-Newman utilitzem el seu algoritme
-        communities_generator = girvan_newman(g) #generem les comunitats
-        communities = next(communities_generator) #amb next obtenim la primera
-        communities = [list(c) for c in communities] #iterem sobre la llista "comunities" i les convertim en una llista per guardar a "comunities" una llista de llistes
-    elif method.lower() == 'louvain':
-        partition = community_louvain.best_partition(g)
-        communities = {}
-        for node, comm in partition.items():
-            communities.setdefault(comm, []).append(node)
-        communities = list(communities.values())
-    else:
+   if method.lower() == 'girvan-newman': #si el mètode seleccionat es Girvan-Newman utilitzem el seu algoritme
+        communities_generator = girvan_newman(g) #inicialitzem un generador que produirà particionsd successivament
+        communities = next(communities_generator) #amb next obtenim la primera partició de comunitats del generador (al ser la primera conté poques comunitats grans)
+        #la partició retornada ("comunities") és una tupla de conjunts, on cada conjunt representa una comunitat de nodes -> ({comunitat 1}, {comunitat 2})
+        communities = [list(c) for c in communities] #iterem sobre "comunities" i ho convertim en una llista per guardar a "comunities" una llista de llistes -> [[comunitat 1], [comunitat 2]]
+    
+    elif method.lower() == 'louvain': #si el mètode seleccionat és Louvain
+        partition = community_louvain.best_partition(g) #detectem comunitats, "partition" és un diccionari on key=nodes i value=número per indicar a quina comunitat pertany el node
+        communities = {} #creem un diccionari per reorganitzar els nodes
+        for node, comm in partition.items(): #iterem sobre el diccionari partition per tenir cada clau i valor
+            if comm not in communities:  # omprovem si la comunitat no està ja al diccionari
+                communities[comm] = []  #si no existeix, la inicialitzem amb una llista buida
+            communities[comm].append(node)  #afegim el node a la llista de la comunitat corresponent
+        communities = list(communities.values())  #convertim el diccionari en una llista de llistes
+    
+    else: #si el mètode que s'ha passat com a paràmetre no és girvan-newman/louvain llancem excepció
         raise ValueError("Error: Mètode invàlida, utilitza 'girvan-newman' o 'louvain'.")
-    modularity = nx.algorithms.community.quality.modularity(g, communities)
-    return communities, modularity #retornem
+    modularity = nx.algorithms.community.quality.modularity(g, communities) #calculem la modularitat utilitzant netowrkx de la partició obtinguda
+    return communities, modularity #retornem les comunitats i la modularitat de la partició
   
 
 
