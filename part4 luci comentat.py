@@ -19,7 +19,6 @@ def plot_degree_distribution(degree_dict: dict, normalized: bool = False, loglog
     if normalized: #si es TRUE (passat com a paràmetre)
         total = sum(occurences) #es calcula el total
         occurences = [o/total for o in occurences] #FALTA POSARU SENSE LIST COMPR LO QUE NO SE FERHO
-    
     plt.figure(figsize=(8, 6))
     plt.grid(True, which="both", linestyle="--", linewidth=0.5, alpha=0.7)
     if loglog:
@@ -35,6 +34,7 @@ def plot_degree_distribution(degree_dict: dict, normalized: bool = False, loglog
     plt.show()
 
 
+
 def plot_audio_features(artists_audio_feat: pd.DataFrame, artist1_id: str, artist2_id: str) -> None:
     """
     Plot a (single) figure with a plot of mean audio features of two different artists.
@@ -44,6 +44,7 @@ def plot_audio_features(artists_audio_feat: pd.DataFrame, artist1_id: str, artis
     :param artist2_id: string with id of artist 2.
     :return: None
     """
+    
     if artist1_id not in artists_audio_feat.index or artist2_id not in artists_audio_feat.index:
         raise ValueError("Algun artist IDs no s'ha trobat al DataFrame index.")
     artist1_features = artists_audio_feat.loc[artist1_id]
@@ -65,7 +66,6 @@ def plot_audio_features(artists_audio_feat: pd.DataFrame, artist1_id: str, artis
 
 
 
-
 def plot_similarity_heatmap(artist_audio_features_df: pd.DataFrame, similarity: str, out_filename: str = None) -> None:
     """
     Plot a heatmap of the similarity between artists.
@@ -75,11 +75,11 @@ def plot_similarity_heatmap(artist_audio_features_df: pd.DataFrame, similarity: 
     :param out_filename: name of the file to save the plot. If None, the plot is not saved.
     """
 
-    if similarity.lower() not in {"cosine", "euclidean"}:
-        raise ValueError("Unsupported similarity metric. Use 'cosine' or 'euclidean'.")
-    features = artist_audio_features_df.values  # Matriz de características (valores numéricos)
-    if similarity.lower() == "cosine":
-        similarity_matrix = cosine_similarity(features)
+    if similarity.lower() not in {"cosine", "euclidean"}: #si "similarity" (passat com a paràmetre) no és "cosine" o "euclidean"
+        raise ValueError("ERROR: utilitza 'cosine' o 'euclidean'.")  #salta error
+    features = artist_audio_features_df.values  #agafa els valors numèrics del dataframe i ho emmagatzema a "features"
+    if similarity.lower() == "cosine": #si és cosine
+        similarity_matrix = cosine_similarity(features) #
     elif similarity.lower() == "euclidean":
         similarity_matrix = -euclidean_distances(features)  
     artist_names = artist_audio_features_df.index.tolist()
