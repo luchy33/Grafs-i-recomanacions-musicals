@@ -143,9 +143,11 @@ def create_similarity_graph(artist_audio_features_df: pd.DataFrame, similarity: 
     noms_artistes = artist_audio_features_df.index.tolist() #emmagatzema en la llista "noms_artistes" els indexs que equivalen als artistes en el dataframe 
     caracteristiques = artist_audio_features_df.values  #guardem en "caracteristiques" els valors numèrics de les característiques que conte el dataframe
     if similarity.lower() == "cosine": #segons la similaritat que es passa a la funció, s'utilitza una mètrica o una altra amb les caracterísitques
-        similarity_matrix = cosine_similarity(caracteristiques)
+        similarity_matrix = cosine_similarity(caracteristiques) #valors entre 0 i 1 (1 màxima similitud)
     elif similarity.lower() == "euclidean":
-        similarity_matrix = -euclidean_distances(caracteristiques)
+        #calcula la similaritat a partir de la distància Euclidiana. Es transforma la distància (que és sempre positiva) en una mètrica de similaritat 
+        #amb valors entre 0 i 1, utilitzant la fórmula 1 / (1 + distància). Valors més propers a 1 indiquen una major similitud.
+        similarity_matrix = 1/(1+euclidean_distances(caracteristiques))
     else: #si similarity no és ni cosine ni euclidean imprimeix error
         raise ValueError("Similaritat invàlida, utilitza 'cosine' o 'euclidean'.")
 
