@@ -4,8 +4,31 @@ import spotipy
 
 # ------- IMPLEMENT HERE ANY AUXILIARY FUNCTIONS NEEDED ------- #
 
-from spotipy.oauth2 import SpotifyClientCredentials
+def analitza_dataset(csv):
+    """
+    Aquesta funció analitza un dataset de cançons i retorna:
+    - El nombre total de cançons
+    - El nombre d'artistes únics
+    - El nombre d'àlbums únics
+    
+    Paràmetres:
+        ruta_csv (str): La ruta al fitxer CSV
+        
+    Retorna:
+        dict: Un diccionari amb els resultats
+    """
+    dades = pd.read_csv(csv)   #llegir el fitxer CSV
+    total_cancons = dades.shape[0]   #calcular el nombre total de cançons
 
+    artistes_unics = dades['artist_id'].nunique() #calcular el nombre d'artistes únics
+    albums_unics = dades['album_id'].nunique() #calcular el nombre d'àlbums únics
+    
+    #retornar els resultats en un diccionari
+    return {
+        "Total de cançons": total_cancons,
+        "Total d'artistes únics": artistes_unics,
+        "Total d'àlbums únics": albums_unics
+    }
 
 
 # --------------- END OF AUXILIARY FUNCTIONS ------------------ #
