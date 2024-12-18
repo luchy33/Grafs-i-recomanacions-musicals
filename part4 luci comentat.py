@@ -114,3 +114,41 @@ if __name__ == "__main__":
     plot_similarity_heatmap(artists_audio_feat, similarity="cosine", out_filename="cosine_similarity_heatmap.png")
     plot_similarity_heatmap(artists_audio_feat, similarity="euclidean")
 
+
+
+if __name__ == "__main__":
+    
+    print("# --- Exercici 4 --- #")
+    gw = nx.read_graphml("BrunoMars_similarity_graph.graphml")
+    gb_un = nx.read_graphml("BrunoMars_100_BFS_undirected.graphml")
+    gd_un = nx.read_graphml("BrunoMars_100_DFS_undirected.graphml")
+    """
+    #Part a)
+    degree_dict_gw = get_degree_distribution(gw)
+    degree_dict_gb_un = get_degree_distribution(gb_un)
+    degree_dict_gd_un = get_degree_distribution(gd_un)
+    print("Plotting Degree Distribution for gw...")
+    plot_degree_distribution(degree_dict_gw, "Gw", normalized=True, loglog=True)
+    print("Plotting Degree Distribution for gb_un...")
+    plot_degree_distribution(degree_dict_gb_un, "G'b",normalized=True, loglog=True)
+    print("Plotting Degree Distribution for gd_un...")
+    plot_degree_distribution(degree_dict_gd_un, "G'd", normalized=True, loglog=True)
+    """
+    #Part b)
+    bruno_mars_id = get_artist_id_by_name(gw, "Bruno Mars")
+    
+    # Trobar l'artista més similar a Bruno Mars
+    most_similar_artist = find_most_similar_artist(gw, bruno_mars_id)
+    print(f"L'artista més similar a Bruno Mars és: {most_similar_artist}")
+    
+    # Carregar el DataFrame amb les característiques d'àudio dels artistes
+    artists_audio_feat = pd.read_csv("Bruno_Mars_features.csv", index_col="artist_id")
+    
+    # Generar la comparació de les característiques d'àudio entre Bruno Mars i l'artista més similar
+    plot_audio_features(artists_audio_feat, artist1_id=bruno_mars_id, artist2_id=most_similar_artist, gw=gw)
+    """
+    node_attributes = list(gw.nodes(data=True))[:5]
+    # Mostrar els atributs del node d'un artista concret, per exemple "BrunoMars"
+    print(node_attributes)
+    """
+
