@@ -8,10 +8,10 @@ import community as community_louvain
 # ------- IMPLEMENT HERE ANY AUXILIARY FUNCTIONS NEEDED ------- #
 def get_artist_id_by_name(g, artist_name):
     """Obté l'ID de l'artista a partir del seu nom."""
-    for node_id, data in g.nodes(data=True):
-        if data.get('name') == artist_name:
-            return node_id
-    return None
+    for node_id, data in g.nodes(data=True):  # Iterem sobre els nodes del graf i les seves dades
+        if data.get('name') == artist_name:  # Comprovem si el nom de l'artista coincideix
+            return node_id  # Retornem l'ID del node si trobem una coincidència
+    return None  # Retornem None si no trobem l'artista
 
 def determine_min_clique_size(gb_un: nx.Graph, gd_un: nx.Graph, min_size_range: range = range(3, 11)) -> int:
     """
@@ -22,21 +22,21 @@ def determine_min_clique_size(gb_un: nx.Graph, gd_un: nx.Graph, min_size_range: 
     :param min_size_range: El rang de mides de clique a provar (per defecte de 3 a 10).
     :return: La mida mínima de clique que genera almenys 2 cliques en ambdós grafs.
     """
-    for min_clique_size in min_size_range:
+    for min_clique_size in min_size_range:  # Iterem sobre el rang de mides possibles de clique
        # Troba les cliques per a la mida mínima actual
-       cliques_b, _ = find_cliques(gb_un, min_size_clique=min_clique_size)
-       cliques_d, _ = find_cliques(gd_un, min_size_clique=min_clique_size)
+       cliques_b, _ = find_cliques(gb_un, min_size_clique=min_clique_size)  # Trobar les cliques a g'B
+       cliques_d, _ = find_cliques(gd_un, min_size_clique=min_clique_size)  # Trobar les cliques a g'D
 
        # Comprova si hi ha almenys 2 cliques en ambdós grafs
        if len(cliques_b) >= 2 and len(cliques_d) >= 2:
-           valid_clique_size = min_clique_size
+           valid_clique_size = min_clique_size  # Si trobem 2 cliques, actualitzem el valor de la mida de la clique
 
-    if valid_clique_size is not None:
+    if valid_clique_size is not None:  # Si trobem una mida vàlida per a la clique
        print(f"El màxim valor de min_clique_size que genera almenys 2 cliques en ambdós grafs és: {valid_clique_size}")
-       return valid_clique_size
-    else:
+       return valid_clique_size  # Retornem la mida mínima vàlida
+    else:  # Si no trobem cap mida vàlida
        print("No s'ha trobat una mida de clique que generi almenys 2 cliques en ambdós grafs.")
-       return None
+       return None  # Retornem None si no s'ha trobat cap mida vàlida
 
 def get_artist_names(g: nx.Graph, node_ids: list) -> list:
     """
@@ -46,12 +46,12 @@ def get_artist_names(g: nx.Graph, node_ids: list) -> list:
     :param node_ids: Llista d'ID de nodes.
     :return: Llista de noms d'artistes.
     """
-    artist_names = []
-    for node_id in node_ids:
+    artist_names = []  # Inicialitzem una llista buida per emmagatzemar els noms dels artistes
+    for node_id in node_ids:  # Iterem sobre els IDs de nodes
         # Utilitzem get() per evitar el KeyError si 'name' no està present
-        name = g.nodes[node_id].get('name', "Desconegut")
-        artist_names.append(name)
-    return artist_names
+        name = g.nodes[node_id].get('name', "Desconegut")  # Obtenim el nom de l'artista, si no existeix retornem "Desconegut"
+        artist_names.append(name)  # Afegim el nom de l'artista a la llista
+    return artist_names  # Retornem la llista de noms d'artistes
 
 def min_ad_cost(g: nx.Graph, cost_per_artist: int = 100):
     """
@@ -63,12 +63,12 @@ def min_ad_cost(g: nx.Graph, cost_per_artist: int = 100):
     :return: Cost mínim en euros.
     """
     # Identificar els nodes més centrals per cobrir tot el graf
-    central_nodes = get_k_most_central(g, 'degree', num_nodes=len(g.nodes) // 10)
-    num_artists = len(central_nodes)
-    
+    central_nodes = get_k_most_central(g, 'degree', num_nodes=len(g.nodes) // 10)  # Obtenim els nodes més centrals segons el grau
+    num_artists = len(central_nodes)  # Comptem el nombre de nodes centrals
+
     # Calcular el cost
-    total_cost = num_artists * cost_per_artist
-    return total_cost, central_nodes
+    total_cost = num_artists * cost_per_artist  # El cost total és el nombre d'artistes per el cost per artista
+    return total_cost, central_nodes  # Retornem el cost total i els nodes centrals seleccionats
 
 def best_ad_spread(g: nx.Graph, budget: int = 400, cost_per_artist: int = 100):
     """
@@ -80,27 +80,27 @@ def best_ad_spread(g: nx.Graph, budget: int = 400, cost_per_artist: int = 100):
     :param cost_per_artist: Cost per posar un anunci a cada artista.
     :return: Llista d'artistes seleccionats per a la publicitat.
     """
-    num_artists = budget // cost_per_artist  # Determinem quants artistes podem pagar
-    top_artists = get_k_most_central(g, 'degree', num_nodes=num_artists)  # Seleccionem els més centrals
+    num_artists = budget // cost_per_artist  # Determinem quants artistes podem pagar amb el pressupost disponible
+    top_artists = get_k_most_central(g, 'degree', num_nodes=num_artists)  # Seleccionem els artistes més centrals
 
-    return top_artists
+    return top_artists  # Retornem els artistes seleccionats
 
 def find_shortest_path(g, start_artist, end_artist):
     """Troba el camí més curt entre dos artistes per ID."""
-    start_node = get_artist_id_by_name(g, start_artist)
-    end_node = get_artist_id_by_name(g, end_artist)
+    start_node = get_artist_id_by_name(g, start_artist)  #obtenim l'ID de l'artista d'inici
+    end_node = get_artist_id_by_name(g, end_artist)  #obtenim l'ID de l'artista final
     
-    if start_node is None:
+    if start_node is None:  #si no trobem l'artista d'inici al graf
         return f"Error: '{start_artist}' no es troba al graf."
-    if end_node is None:
+    if end_node is None:  #si no trobem l'artista final al graf
         return f"Error: '{end_artist}' no es troba al graf."
     
     try:
-        path = nx.shortest_path(g, source=start_node, target=end_node)
-        path_names = get_artist_names(g, path)
-        return path_names
-    except nx.NetworkXNoPath:
-        return None
+        path = nx.shortest_path(g, source=start_node, target=end_node)  #trobar el camí més curt
+        path_names = get_artist_names(g, path)  #convertim els IDs dels nodes en noms d'artistes
+        return path_names  #retornem el camí com a llista de noms d'artistes
+    except nx.NetworkXNoPath:  #si no hi ha camí entre els dos artistes
+        return None  #retornem None si no es pot trobar un camí
 
 # --------------- END OF AUXILIARY FUNCTIONS ------------------ #
 
