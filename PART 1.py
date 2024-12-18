@@ -3,7 +3,6 @@ import pandas as pd
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 
-
 # ------- IMPLEMENT HERE ANY AUXILIARY FUNCTIONS NEEDED ------- #
 
 def analitza_dataset(csv):
@@ -12,10 +11,10 @@ def analitza_dataset(csv):
     - El nombre total de cançons
     - El nombre d'artistes únics
     - El nombre d'àlbums únics
-    
+   
     Paràmetres:
         ruta_csv (str): La ruta al fitxer CSV
-        
+       
     Retorna:
         dict: Un diccionari amb els resultats
     """
@@ -24,13 +23,16 @@ def analitza_dataset(csv):
 
     artistes_unics = dades['artist_id'].nunique() #calcular el nombre d'artistes únics
     albums_unics = dades['album_id'].nunique() #calcular el nombre d'àlbums únics
-    
+   
     #retornar els resultats en un diccionari
     return {
         "Total de cançons": total_cancons,
         "Total d'artistes únics": artistes_unics,
         "Total d'àlbums únics": albums_unics
     }
+
+resultats = analitza_dataset("BrunoMars_100_tracks.csv")
+print(resultats)
 
 # --------------- END OF AUXILIARY FUNCTIONS ------------------ #
 
@@ -74,15 +76,17 @@ def crawler(sp: spotipy.client.Spotify, seed: str, max_nodes_to_crawl: int, stra
     graph = nx.DiGraph() #creem un graf dirigit buit
     visited = set()  #conjunt d'artistes ja visitats
     to_visit = [seed]  #llista d'artistes pendents de visitar
-    
+   
     #explora els artistes fins arribar al límit màxim o fins que no quedi cap node pendent
     while to_visit and len(visited) < max_nodes_to_crawl:
         current_artist = to_visit.pop(0 if strategy == "BFS" else -1) #agafem el següent artista a visitar segons l'estratègia
        
-        if current_artist in visited: 
+        if current_artist in visited:
             continue #si ja hem visitat l'artista, saltem aquesta iteració
+       
         try:
             visited.add(current_artist) #marca l'artista com a visitat afegint-lo al conjunt
+       
             #recupera tota la informació de l'artista: nom, seguidors, popularitat, gèneres
             artist_data = sp.artist(current_artist)
             graph.add_node(
@@ -91,13 +95,15 @@ def crawler(sp: spotipy.client.Spotify, seed: str, max_nodes_to_crawl: int, stra
                 followers=artist_data["followers"]["total"],
                 popularity=artist_data["popularity"],
                 genres=artist_data["genres"]
-            ) 
+            )
+       
             related_artists = sp.artist_related_artists(current_artist)["artists"] #recupera els artistes relacionats
             for related_artist in related_artists: #itera sobre cada artista relacionat a l'artista actual
                 related_id = related_artist["id"] #recupera l'ID dels artistes relacionats
                 if related_id not in visited and related_id not in to_visit: #comprova que no hagin estat visitats
                     to_visit.append(related_id) #afegeix els artistes relacionats a la llista a visitar
-                graph.add_edge(current_artist, related_id) #afegeix una aresta del node actual als artistes relacionats    
+                graph.add_edge(current_artist, related_id) #afegeix una aresta del node actual als artistes relacionats
+       
         except spotipy.exceptions.SpotifyException as e:
             print(f"S'ha produït una SpotifyException per a l'artista {current_artist}: {e}") #gestiona errors específics de Spotify
         except Exception as e:
@@ -109,6 +115,7 @@ def crawler(sp: spotipy.client.Spotify, seed: str, max_nodes_to_crawl: int, stra
         print("El graf està buit")
         return graph
     # ----------------- END OF FUNCTION --------------------- #
+
 
 
 def get_track_data(sp: spotipy.client.Spotify, graphs: list, out_filename: str) -> pd.DataFrame:
@@ -132,9 +139,12 @@ def get_track_data(sp: spotipy.client.Spotify, graphs: list, out_filename: str) 
                 for graph in graphs  #iterem sobre la llista de grafs
                 if artist_id in graph.nodes  #només considerem els grafs que contenen aquest artista
             )
+           
             top_tracks = sp.artist_top_tracks(artist_id, country="ES")["tracks"] #recupera les cançons més escoltades de l'artista
+           
             for track in top_tracks:
                 audio_features = sp.audio_features([track["id"]])[0] #recupera les característiques d'àudio de cada cançó
+               
                 track_data.append({ #afegeix la informació de cada cançó a la llista
                     "track_id": track["id"],
                     "track_name": track["name"],
@@ -154,14 +164,17 @@ def get_track_data(sp: spotipy.client.Spotify, graphs: list, out_filename: str) 
                     "liveness": audio_features["liveness"] if audio_features else None,
                     "valence": audio_features["valence"] if audio_features else None,
                     "tempo": audio_features["tempo"] if audio_features else None,
-                })  
+                })
+       
         except spotipy.exceptions.SpotifyException as e:
             print(f"SpotifyException occurred for artist {artist_id}: {e}") #gestiona errors específics de Spotify
         except Exception as e:
             print(f"An error occurred for artist {artist_id}: {e}") #gestiona errors generals
-    df = pd.DataFrame(track_data) #crea un DataFrame amb la informació recollida   
+
+    df = pd.DataFrame(track_data) #crea un DataFrame amb la informació recollida
+   
     if df.empty: #comprovem que el dataframe no estigui buit
-        print("No s'ha trobat cap data, el csv no es crearà.")
+        print("No s'ha trobat cap data, el csv no es crearà")
     else:
         df.to_csv(out_filename, index=False) #guarda el DataFrame en un fitxer CSV
     return df #retorna el DataFrame
@@ -170,6 +183,7 @@ def get_track_data(sp: spotipy.client.Spotify, graphs: list, out_filename: str) 
 
 if __name__ == "__main__":
     # ------- IMPLEMENT HERE THE MAIN FOR THIS SESSION ------- #
+   
     CLIENT_ID = "0a03746de0e54710b6aab33d9e73c5c5"
     CLIENT_SECRET = "19a652f5d6a14596a078cba2b5edef3a"
     auth_manager = SpotifyClientCredentials(client_id = CLIENT_ID, client_secret = CLIENT_SECRET)
@@ -189,4 +203,7 @@ if __name__ == "__main__":
     ll_grafs.append(crawler(sp, str(artist_id), 100, "BFS", "BM_BFS.graphml")) #cridem la funció amb Burno Mars per obtenir el graf BFS
     ll_grafs.append(crawler(sp, str(artist_id), 100, "DFS", "BM_DFS.graphml")) #cridem la funció amb Bruno Mars per obtenir el graf DFS
     data_frame = get_track_data(sp, ll_grafs, "BrunoMars_100.csv") #obtenim el data frame
+   
+    resultats = analitza_dataset("BrunoMars_100_tracks.csv")
+    print(resultats)
     # ------------------- END OF MAIN ------------------------ #
