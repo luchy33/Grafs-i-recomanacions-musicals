@@ -6,6 +6,7 @@ import community as community_louvain
 
 
 # ------- IMPLEMENT HERE ANY AUXILIARY FUNCTIONS NEEDED ------- #
+
 def get_artist_id_by_name(g, artist_name):
     """Obté l'ID de l'artista a partir del seu nom."""
     for node_id, data in g.nodes(data=True):  # Iterem sobre els nodes del graf i les seves dades
