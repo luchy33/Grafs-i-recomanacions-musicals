@@ -1,6 +1,7 @@
 import networkx as nx
 import pandas as pd
 import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
 
 # ------- IMPLEMENT HERE ANY AUXILIARY FUNCTIONS NEEDED ------- #
 
