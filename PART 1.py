@@ -3,6 +3,7 @@ import pandas as pd
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 
+
 # ------- IMPLEMENT HERE ANY AUXILIARY FUNCTIONS NEEDED ------- #
 
 def analitza_dataset(csv):
@@ -30,7 +31,6 @@ def analitza_dataset(csv):
         "Total d'artistes únics": artistes_unics,
         "Total d'àlbums únics": albums_unics
     }
-
 
 # --------------- END OF AUXILIARY FUNCTIONS ------------------ #
 
@@ -81,10 +81,8 @@ def crawler(sp: spotipy.client.Spotify, seed: str, max_nodes_to_crawl: int, stra
        
         if current_artist in visited: 
             continue #si ja hem visitat l'artista, saltem aquesta iteració
-       
         try:
             visited.add(current_artist) #marca l'artista com a visitat afegint-lo al conjunt
-       
             #recupera tota la informació de l'artista: nom, seguidors, popularitat, gèneres
             artist_data = sp.artist(current_artist)
             graph.add_node(
@@ -93,15 +91,13 @@ def crawler(sp: spotipy.client.Spotify, seed: str, max_nodes_to_crawl: int, stra
                 followers=artist_data["followers"]["total"],
                 popularity=artist_data["popularity"],
                 genres=artist_data["genres"]
-            )
-       
+            ) 
             related_artists = sp.artist_related_artists(current_artist)["artists"] #recupera els artistes relacionats
             for related_artist in related_artists: #itera sobre cada artista relacionat a l'artista actual
                 related_id = related_artist["id"] #recupera l'ID dels artistes relacionats
                 if related_id not in visited and related_id not in to_visit: #comprova que no hagin estat visitats
                     to_visit.append(related_id) #afegeix els artistes relacionats a la llista a visitar
-                graph.add_edge(current_artist, related_id) #afegeix una aresta del node actual als artistes relacionats
-       
+                graph.add_edge(current_artist, related_id) #afegeix una aresta del node actual als artistes relacionats    
         except spotipy.exceptions.SpotifyException as e:
             print(f"S'ha produït una SpotifyException per a l'artista {current_artist}: {e}") #gestiona errors específics de Spotify
         except Exception as e:
@@ -113,7 +109,6 @@ def crawler(sp: spotipy.client.Spotify, seed: str, max_nodes_to_crawl: int, stra
         print("El graf està buit")
         return graph
     # ----------------- END OF FUNCTION --------------------- #
-
 
 
 def get_track_data(sp: spotipy.client.Spotify, graphs: list, out_filename: str) -> pd.DataFrame:
@@ -137,12 +132,9 @@ def get_track_data(sp: spotipy.client.Spotify, graphs: list, out_filename: str) 
                 for graph in graphs  #iterem sobre la llista de grafs
                 if artist_id in graph.nodes  #només considerem els grafs que contenen aquest artista
             )
-            
             top_tracks = sp.artist_top_tracks(artist_id, country="ES")["tracks"] #recupera les cançons més escoltades de l'artista
-            
             for track in top_tracks:
                 audio_features = sp.audio_features([track["id"]])[0] #recupera les característiques d'àudio de cada cançó
-                
                 track_data.append({ #afegeix la informació de cada cançó a la llista
                     "track_id": track["id"],
                     "track_name": track["name"],
@@ -162,17 +154,14 @@ def get_track_data(sp: spotipy.client.Spotify, graphs: list, out_filename: str) 
                     "liveness": audio_features["liveness"] if audio_features else None,
                     "valence": audio_features["valence"] if audio_features else None,
                     "tempo": audio_features["tempo"] if audio_features else None,
-                })
-        
+                })  
         except spotipy.exceptions.SpotifyException as e:
             print(f"SpotifyException occurred for artist {artist_id}: {e}") #gestiona errors específics de Spotify
         except Exception as e:
             print(f"An error occurred for artist {artist_id}: {e}") #gestiona errors generals
-
-    df = pd.DataFrame(track_data) #crea un DataFrame amb la informació recollida
-    
+    df = pd.DataFrame(track_data) #crea un DataFrame amb la informació recollida   
     if df.empty: #comprovem que el dataframe no estigui buit
-        print("No s'ha trobat cap data, el csv no es crearà")
+        print("No s'ha trobat cap data, el csv no es crearà.")
     else:
         df.to_csv(out_filename, index=False) #guarda el DataFrame en un fitxer CSV
     return df #retorna el DataFrame
